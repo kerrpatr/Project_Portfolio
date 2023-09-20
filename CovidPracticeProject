@@ -3,6 +3,7 @@ from stone-host-396821.Covid_Data.Covid_Deaths
 WHERE continent is not null
 Order By 3,4
 
+--Using data from https://ourworldindata.org/covid-deaths
 --select *
 --from stone-host-396821.Covid_Data.Covid_Vaccinations
 --Order By 3,4
