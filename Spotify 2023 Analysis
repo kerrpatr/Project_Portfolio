@@ -1,0 +1,71 @@
+SELECT *
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+order by 1, 2
+
+--Used Data from https://www.kaggle.com/datasets/nelgiriyewithana/top-spotify-songs-2023--
+
+-- Seeing the top 100 songs on Spotify Playlist by ranking
+SELECT track_name, artist_s__name, in_spotify_charts
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE in_spotify_charts != 0
+ORDER BY in_spotify_charts
+LIMIT 100
+
+-- Looking at comparisons between Spotify Top Songs vs. other charts
+SELECT track_name, artist_s__name, in_spotify_charts, in_apple_charts, in_deezer_charts
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE in_spotify_charts is not null
+AND in_spotify_charts <> 0
+ORDER BY in_spotify_charts 
+
+-- Looking at most streamed songs on Spotify
+SELECT track_name, artist_s__name, SAFE_CAST(streams AS int) AS spotify_streams
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE streams is not null
+ORDER BY SAFE_CAST(streams AS int) DESC 
+
+-- Now combining Spotify Top Songs with amount of times streamed and ranking it
+SELECT track_name, 
+  artist_s__name, 
+  SAFE_CAST(streams AS int) AS spotify_streams, 
+  in_spotify_charts,
+  RANK() OVER (ORDER BY SAFE_CAST(streams AS int) DESC) AS Streams_Rank,
+  RANK() OVER (PARTITION BY in_spotify_charts ORDER BY SAFE_CAST(streams AS int)) AS Charts_Rank
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+ORDER BY SAFE_CAST(streams AS int) DESC 
+
+-- Let's see if the key of the song makes it more popular
+SELECT track_name, 
+  artist_s__name, 
+  SAFE_CAST(streams AS int) AS spotify_streams,
+  key,
+  RANK() OVER (ORDER BY SAFE_CAST(streams AS int) DESC) AS Streams_Rank,
+  RANK() OVER (PARTITION BY key ORDER BY SAFE_CAST(streams AS int)DESC) AS Rolling_Rank_of_Key
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE streams is not null
+  AND key is not null
+ORDER BY SAFE_CAST(streams AS int) DESC 
+
+-- Let's see what if the danceability attribute is more prevalent in popular music
+SELECT track_name, 
+  artist_s__name, 
+  SAFE_CAST(streams AS int) AS spotify_streams,
+  danceability__,
+  CASE
+    WHEN danceability__ <= 20
+    THEN "20% and less"
+    WHEN danceability__ <= 40
+    AND danceability__ > 20
+    THEN "21%-40%"
+    WHEN danceability__ <= 60
+    AND danceability__ > 40
+    THEN "41%-60%"
+    WHEN danceability__ <= 80
+    AND danceability__ > 60
+    THEN "61%-80%"
+  ELSE "81%-100%"
+  END AS danceability_summary 
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE streams is not null
+  AND danceability__ is not null
+ORDER BY SAFE_CAST(streams AS int) DESC 
