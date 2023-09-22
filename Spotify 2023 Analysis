@@ -34,7 +34,7 @@ SELECT track_name,
 FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
 ORDER BY SAFE_CAST(streams AS int) DESC 
 
--- Let's see if the key of the song makes it more popular
+-- Let's see what keys the most streamed songs have
 SELECT track_name, 
   artist_s__name, 
   SAFE_CAST(streams AS int) AS spotify_streams,
@@ -45,6 +45,15 @@ FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
 WHERE streams is not null
   AND key is not null
 ORDER BY SAFE_CAST(streams AS int) DESC 
+LIMIT 100
+
+-- Let's check the most used key in the top songs
+SELECT Count(in_spotify_charts) AS spotify_charts, 
+  key 
+FROM stone-host-396821.Spotify_Data.Spotify_Full_Data
+WHERE key is not null  
+GROUP BY key
+ORDER BY spotify_charts DESC
 
 -- Let's see what if the danceability attribute is more prevalent in popular music
 SELECT track_name, 
